@@ -37,20 +37,12 @@ void blink(int16_t n, bool zd = 0){
     }
   }
 }
-//*********************************************
-void setup() {
-  Serial.begin(115200);
-  pinMode(PIN_LED, OUTPUT);
-  blink(3, true);
-  attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), button_interr_i, CHANGE);
-}
-//*********************************************
-void loop() {
+//---------------------------------------------
+int16_t getPressButton(){
   if(ft_i){
     int32_t t_click = millis();
     if(t_click - t_pause > DREBEZG){
       if(digitalRead(PIN_BUTTON) == HIGH){
-          Serial.println(t_click - buttonTime_i);
           if(t_click - buttonTime_i < TIME_SHOT){
               buttonTime_i = t_click;
           } else {
@@ -63,14 +55,29 @@ void loop() {
   } else if(nClicks > 0 && millis() - buttonTime_i > TIME_CLICK){
     buttonStatus_i = 1;
   }
-
-  if(buttonStatus_i > 0){
-    switch(buttonStatus_i){
+  return buttonStatus_i;
+}
+//---------------------------------------------
+void clearButton(){
+  buttonStatus_i = 0;
+  nClicks = 0;
+  ft_i = 0;
+}
+//*********************************************
+void setup() {
+  Serial.begin(115200);
+  pinMode(PIN_LED, OUTPUT);
+  blink(3, true);
+  attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), button_interr_i, CHANGE);
+}
+//*********************************************
+void loop() {
+  int16_t res = getPressButton();
+  if( res > 0 ){
+    switch(res){
       case 1: blink(nClicks, 1); break;
       case 2: blink(8); break;
     }
-    buttonStatus_i = 0;
-    nClicks = 0;
-    ft_i = 0;
+    clearButton();
   }
 }
